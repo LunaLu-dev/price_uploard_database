@@ -1,59 +1,58 @@
 const { MongoClient } = require('mongodb');
+const http = require('http');
+const url = require('url');
 
 const uri = 'mongodb://192.168.1.69:7002/?directConnection=true';
 
 const client = new MongoClient(uri);
 
-const database = client.db("wishlist");
-const collection = database.collection("users");
+const database = client.db("hificonsult");
 
-//TODO: HTTP INPUT Required: USERID, Optionals: Collection id
-
-/*async function main() {
+async function main() {
 
 
+    const server = http.createServer(async (req, res) => {
 
-    try {
-        await client.connect();
+        res.statusCode = 200;
 
-        console.log("Connected successfully to server");
+        // Setting CORS headers to allow requests from your front-end
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-        const database = client.db("wishlist");
-        const collection = database.collection("users");
+        const query = url.parse(req.url, true).query;
+        const {type, category, subcategory} = query;
 
+        try {
+            let response_value;
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            if(type == "read"){
+                if(!category){
+                    response_value = await GetCategory();
+                }
+                else if(!subcategory){
+                    response_value = await GetSubCategory(category);
+                }
+            }
 
+            console.log(response_value);
+            res.end(JSON.stringify(response_value));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Internal Server Error');
+        }
+    });
 
+    const PORT = 7069;
+    const HOST = '127.0.0.1';
+    server.listen(PORT, () => {
+        console.log(`Server running on ${HOST}:${PORT}`);
+    });
+}
 
-
-        await collection.insertOne({
-            name: "John",
-            age: 30,
-            address: "Highway 37"
-        })
-
-        //await collection.deleteOne({ name: "John"});
-
-        //await collection.updateOne({ name: "Luna Nordbergh"}, { $set: { age: 52 }});
-
-
-        const documents = await collection.findOne();
-        console.log(documents);
-
-        //await client.close();
-
-
-    } catch (e) {
-        console.error(e);
-        console.log("Connection failed");
-    }
-}*/
-
-
-//TODO: User Search Function
-async function GetUsers() {
+async function GetCategory() {
     try{
-
-        //const collection = ;
+        const collection = database.collection("category");
 
         await client.connect();
 
@@ -68,23 +67,13 @@ async function GetUsers() {
     }
 }
 
-//User Page
-async function addUser(name, phone, email, password_hash) {
+async function GetSubCategory(category) {
     try{
-
-        //const collection = ;
+        const collection = database.collection("subcategory");
 
         await client.connect();
 
-        const documents = await database.collection("users").insertOne({
-            uid: ,
-            name: name,
-            email: email,
-            isEmailVerified: false,
-            password_hash: password_hash,
-            categories: []
-        });
-        console.log(documents);
+        const documents = await collection.find({category: category}).toArray();
 
         return documents;
 
@@ -93,24 +82,8 @@ async function addUser(name, phone, email, password_hash) {
         return null;
     }
 }
-async function update() {
-
-}
-
-//TODO: Implement Safe Delete User
-async function removeUser(uid) {
-    await client.connect();
-    collection.deleteOne({ name: uid});
-}
-
-//Categories
-async function GetItem(collection_id, uid) {
-
-}
 
 
 
 
-//add();
-GetUsers();
-
+main();
