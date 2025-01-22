@@ -46,8 +46,8 @@ async function main() {
         }
     });
 
-    const PORT = 7069;
-    const HOST = '127.0.0.1';
+    const PORT = 7003;
+    const HOST = '192.168.1.69';
     server.listen(PORT, () => {
         console.log(`Server running on ${HOST}:${PORT}`);
     });
