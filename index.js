@@ -33,6 +33,9 @@ async function main() {
                 else if(!subcategory){
                     response_value = await GetSubCategory(category);
                 }
+                else {
+                    response_value = await GetBrands(category, subcategory);
+                }
             }
 
             console.log(response_value);
@@ -63,7 +66,7 @@ async function GetCategory() {
 
     }catch (error){
         console.log(error);
-        return null;
+        return 501;
     }
 }
 
@@ -79,7 +82,23 @@ async function GetSubCategory(category) {
 
     }catch (error){
         console.log(error);
-        return null;
+        return 501;
+    }
+}
+
+async function GetBrands(category, subcategory) {
+    try{
+        const collection = database.collection("brands");
+
+        await client.connect();
+
+        const documents = await collection.find({category: category, subcategory: subcategory}).toArray();
+
+        return documents;
+
+    }catch (error){
+        console.log(error);
+        return 501;
     }
 }
 
