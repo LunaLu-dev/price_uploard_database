@@ -15,18 +15,17 @@ async function main() {
 
         res.statusCode = 200;
 
-        // Setting CORS headers to allow requests from your front-end
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
         const query = url.parse(req.url, true).query;
-        const {type, category, subcategory} = query;
+        const {type, category, subcategory, name, ref} = query;
 
         try {
             let response_value;
             res.writeHead(200, { 'Content-Type': 'text/plain' });
-            if(type == "read"){
+            if(type === "read"){
                 if(!category){
                     response_value = await GetCategory();
                 }
@@ -35,6 +34,17 @@ async function main() {
                 }
                 else {
                     response_value = await GetBrands(category, subcategory);
+                }
+            }
+            else if(type === "write"){
+                if (ref === "category"){
+                    response_value = await AddCategory(name);
+                }
+                else if(ref === "subcategory"){
+                    response_value = await AddSubCategory(name, category);
+                }
+                else if(ref === "brand"){
+                    response_value = await AddBrand(name, category, subcategory);
                 }
             }
 
@@ -66,7 +76,7 @@ async function GetCategory() {
 
     }catch (error){
         console.log(error);
-        return 501;
+
     }
 }
 
@@ -76,13 +86,11 @@ async function GetSubCategory(category) {
 
         await client.connect();
 
-        const documents = await collection.find({category: category}).toArray();
-
-        return documents;
+        return await collection.find({category: category}).toArray();
 
     }catch (error){
         console.log(error);
-        return 501;
+
     }
 }
 
@@ -92,17 +100,60 @@ async function GetBrands(category, subcategory) {
 
         await client.connect();
 
-        const documents = await collection.find({category: category, subcategory: subcategory}).toArray();
-
-        return documents;
+        return await collection.find({category: category, subcategory: subcategory}).toArray();
 
     }catch (error){
         console.log(error);
-        return 501;
+
     }
 }
 
+async function AddCategory(name) {
+    try{
+        const collection = database.collection("category");
 
+        await client.connect();
 
+        const code_name_str = name.toLowerCase().replaceAll(" ", "_").replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
+
+        return await collection.insertOne({ code_name: code_name_str, public_name: name });
+
+    }catch (error){
+        console.log(error);
+
+    }
+}
+
+async function AddSubCategory(name, category) {
+    try{
+        const collection = database.collection("subcategory");
+
+        await client.connect();
+
+        const code_name_str = name.toLowerCase().replaceAll(" ", "_").replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
+
+        return await collection.insertOne({ code_name: code_name_str, public_name: name, category: category });
+
+    }catch (error){
+        console.log(error);
+
+    }
+}
+
+async function AddBrand(name, category, subcategory) {
+    try{
+        const collection = database.collection("brands");
+
+        await client.connect();
+
+        const code_name_str = name.toLowerCase().replaceAll(" ", "_").replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
+
+        return await collection.insertOne({ code_name: code_name_str, public_name: name, category: category, subcategory: subcategory });
+
+    }catch (error){
+        console.log(error);
+
+    }
+}
 
 main();
