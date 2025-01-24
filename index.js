@@ -26,26 +26,10 @@ async function main() {
             let response_value;
             res.writeHead(200, { 'Content-Type': 'text/plain' });
             if(type === "read"){
-                if(!category){
-                    response_value = await GetCategory();
-                }
-                else if(!subcategory){
-                    response_value = await GetSubCategory(category);
-                }
-                else {
-                    response_value = await GetBrands(category, subcategory);
-                }
+                response_value = await GetBrands();
             }
             else if(type === "write"){
-                if (ref === "category"){
-                    response_value = await AddCategory(name);
-                }
-                else if(ref === "subcategory"){
-                    response_value = await AddSubCategory(name, category);
-                }
-                else if(ref === "brand"){
-                    response_value = await AddBrand(name, category, subcategory);
-                }
+                response_value = await AddBrand(name);
             }
 
             console.log(response_value);
@@ -63,7 +47,7 @@ async function main() {
     });
 }
 
-async function GetCategory() {
+/*async function GetCategory() {
     try{
         const collection = database.collection("category");
 
@@ -78,9 +62,9 @@ async function GetCategory() {
         console.log(error);
 
     }
-}
+}*/
 
-async function GetSubCategory(category) {
+/*async function GetSubCategory(category) {
     try{
         const collection = database.collection("subcategory");
 
@@ -92,15 +76,15 @@ async function GetSubCategory(category) {
         console.log(error);
 
     }
-}
+}*/
 
-async function GetBrands(category, subcategory) {
+async function GetBrands() {
     try{
         const collection = database.collection("brands");
 
         await client.connect();
 
-        return await collection.find({category: category, subcategory: subcategory}).toArray();
+        return await collection.find().toArray();
 
     }catch (error){
         console.log(error);
@@ -108,7 +92,7 @@ async function GetBrands(category, subcategory) {
     }
 }
 
-async function AddCategory(name) {
+/*async function AddCategory(name) {
     try{
         const collection = database.collection("category");
 
@@ -122,9 +106,9 @@ async function AddCategory(name) {
         console.log(error);
 
     }
-}
+}*/
 
-async function AddSubCategory(name, category) {
+/*async function AddSubCategory(name, category) {
     try{
         const collection = database.collection("subcategory");
 
@@ -138,9 +122,9 @@ async function AddSubCategory(name, category) {
         console.log(error);
 
     }
-}
+}*/
 
-async function AddBrand(name, category, subcategory) {
+async function AddBrand(name) {
     try{
         const collection = database.collection("brands");
 
@@ -148,7 +132,7 @@ async function AddBrand(name, category, subcategory) {
 
         const code_name_str = name.toLowerCase().replaceAll(" ", "_").replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
 
-        return await collection.insertOne({ code_name: code_name_str, public_name: name, category: category, subcategory: subcategory });
+        return await collection.insertOne({ code_name: code_name_str, public_name: name });
 
     }catch (error){
         console.log(error);
